@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SkyPulse - Weather Dashboard</title>
+        
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+
+    <body class="theme-dark weather-default">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="icon">⚡</span>
+                <h2>SkyPulse</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" id="nav-dashboard"><a href="#">📊 Dashboard</a></li>
+                <li id="nav-map"><a href="#">🗺️ Map Radar</a></li>
+                <li id="nav-calendar"><a href="#">📅 Calendar</a></li>
+                <li id="nav-settings"><a href="#">⚙️ Settings</a></li>
+            </ul>
+            <div class="sidebar-bottom">
+                <button id="theme-btn">☀️ Light Mode</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- TOP BAR -->
+            <header class="topbar">
+                <div class="search-box" id="search-container">
+                    <input type="text" id="search-input" placeholder="Search City..." autocomplete="off">
+                    <button id="mobile-menu-btn" class="mobile-menu-btn">☰</button>
+                    <button id="search-btn">🔍</button>
+                    <div id="suggestions" class="suggestions-box"></div>
+                </div>
+                <div class="user-info">
+                    <button id="user-btn" class="user-btn">👤 User Name</button>
+                </div>
+            </header>
+
+            <div id="error-box" class="error-box" style="display: none;">Error: Gagal memuat data.</div>
+
+            <!--  VIEW DASHBOARD  -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="dashboard-grid">
+                    
+                    <!-- 1. CURRENT WEATHER (Hero) -->
+                    <div class="card current-weather">
+                        <div class="card-header">
+                            <div class="location-badge">
+                                <span>📍</span> <span id="city-name">Loading...</span>
+                            </div>
+                            <span id="current-date">Today</span>
+                        </div>
+                        <div class="weather-body">
+                            <div class="temp-area">
+                                <h1 id="current-temp">--°</h1>
+                                <p id="weather-desc">Clear</p>
+                                <div class="high-low">
+                                    <span>H: <b id="temp-high">--°</b></span> L: <b id="temp-low">--°</b>
+                                </div>
+                            </div>
+                            <div class="weather-icon" id="main-icon">☀️</div>
+                        </div>
+                        <div class="weather-footer">
+                            <span>Feels like: <b id="feels-like">--°</b></span>
+                        </div>
+                    </div>
+
+                    <!-- 2. TODAY HIGHLIGHTS -->
+                    <div class="card highlights">
+                        <h3>Today Highlight</h3>
+                        <div class="hl-grid">
+                            <div class="hl-item">
+                                <span>Chance of Rain</span>
+                                <h4 id="rain-chance">--%</h4>
+                            </div>
+                            <div class="hl-item">
+                                <span>UV Index</span>
+                                <h4 id="uv-index">--</h4>
+                            </div>
+                            <div class="hl-item">
+                                <span>Wind Status</span>
+                                <h4 id="wind-speed">-- km/h</h4>
+                            </div>
+                            <div class="hl-item">
+                                <span>Humidity</span>
+                                <h4 id="humidity">--%</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. HOURLY FORECAST, Horizontal -->
+                    <div class="card hourly-card">
+                        <h3>Today / Week</h3>
+                        <div class="hourly-scroll" id="hourly-container">
+                            <!-- filled by JS -->
+                        </div>
+                    </div>
+
+                    <!-- 4. SUNRISE & SUNSET -->
+                    <div class="card sun-card">
+                        <h3>Sunrise & Sunset</h3>
+                        <div class="sun-info">
+                            <div class="sun-item">
+                                <span>🌅 Sunrise</span>
+                                <h4 id="sunrise">--:-- AM</h4>
+                            </div>
+                            <div class="sun-item">
+                                <span>🌇 Sunset</span>
+                                <h4 id="sunset">--:-- PM</h4>
+                            </div>
+                        </div>
+                        <div class="length-day">
+                            <span>Length of day</span>
+                            <strong id="day-length">--h --m</strong>
+                        </div>
+                    </div>
+
+                    <!-- 5. EXTRA DETAILS Barometer, Visibility, etc -->
+                    <div class="card extra-details">
+                        <h3>More Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-box">
+                                <span>💧 Dew Point</span>
+                                <h4 id="dew-point">--°</h4>
+                            </div>
+                            <div class="detail-box">
+                                <span>👁️ Visibility</span>
+                                <h4 id="visibility">-- km</h4>
+                            </div>
+                            <div class="detail-box">
+                                <span>🌡️ Pressure</span>
+                                <h4 id="pressure">-- hPa</h4>
+                            </div>
+                            <div class="detail-box">
+                                <span>☁️ Cloud Cover</span>
+                                <h4 id="cloud-cover">--%</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. AIR QUALITY -->
+                    <div class="card air-quality">
+                        <h3>Air Quality</h3>
+                        <div class="aqi-content">
+                            <div class="aqi-circle" id="aqi-circle">
+                                <h2 id="aqi-value">--</h2>
+                                <span id="aqi-status">Loading</span>
+                            </div>
+                            <div class="aqi-details">
+                                <p>PM2.5: <b id="pm25">--</b> µg/m³</p>
+                                <p>PM10: <b id="pm10">--</b> µg/m³</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. 7-DAY FORECAST -->
+                    <div class="card daily-list-card">
+                        <h3>7-Day Forecast</h3>
+                        <div id="daily-list-container" class="daily-list">
+                            <!-- Diisi oleh JS -->
+                        </div>
+                    </div>
+
+                    <!-- 8. HISTORICAL DATA -->
+                    <div class="card history-card">
+                        <h3>Historical Trend (2021)</h3>
+                        <div class="mini-chart">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- VIEW RADAR maps -->
+            <section id="view-map" class="view-section" style="display: none;">
+                <div class="card" style="height: calc(100vh - 120px);">
+                    <h3>Weather Radar Map</h3>
+                    <div id="map" style="width: 100%; height: 100%; border-radius: 12px; margin-top: 10px; z-index: 1;"></div>
+                </div>
+            </section>
+
+            <!-- VIEW CALENDAR -->
+            <section id="view-calendar" class="view-section" style="display: none;">
+                <div class="card">
+                    <h3>Weather Calendar (Next 7 Days)</h3>
+                    <div class="calendar-grid" id="calendar-container"></div>
+                </div>
+            </section>
+
+            <!-- VIEW SETTINGS  -->
+            <section id="view-settings" class="view-section" style="display: none;">
+                <div class="card">
+                    <h3>Settings</h3>
+                    <div class="settings-group">
+                        <label>Temperature Unit</label>
+                        <select id="setting-unit">
+                            <option value="celsius">Celsius (°C)</option>
+                            <option value="fahrenheit">Fahrenheit (°F)</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label>Clear Local Storage (Reset App)</label>
+                        <button id="btn-reset" class="btn-danger">Reset Data</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- MODALS -->
+        <div id="detail-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <span class="close-btn" id="close-modal">&times;</span>
+                <h2 id="modal-date">Date</h2>
+                <div class="modal-body">
+                    <p><strong>Max Temp:</strong> <span id="modal-max">--°</span></p>
+                    <p><strong>Min Temp:</strong> <span id="modal-min">--°</span></p>
+                    <div class="hourly-details-scroll" id="modal-hourly-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="auth-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content auth-content">
+                <span class="close-btn" id="close-auth">&times;</span>
+                <h2 id="auth-title">Login to SkyPulse</h2>
+                <div class="auth-form">
+                    <input type="text" id="auth-username" placeholder="Username">
+                    <input type="password" id="auth-password" placeholder="Password">
+                    <button id="auth-submit-btn" class="btn-primary">Login</button>
+                </div>
+                <p class="auth-toggle">
+                    <span id="auth-switch-text">Don't have an account?</span> 
+                    <a href="#" id="auth-switch-btn">Register here</a>
+                </p>
+            </div>
+        </div>
+
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
