@@ -3,7 +3,7 @@
 A modern, fully responsive weather dashboard that fetches real-time meteorological data from the Open-Meteo API. This project was developed as part of the Frontend Developer Internship program at Auspify Technologies.
 
 ## 🚀 Live Demo
-*([Live Demo]((https://kusnadi34.github.io/task-4-Weather-Dashboard/)))*
+*(((https://kusnadi34.github.io/task-4-Weather-Dashboard/)))*
 
 ## ✨ Features
 
